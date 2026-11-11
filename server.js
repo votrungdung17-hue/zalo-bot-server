@@ -17,7 +17,27 @@ app.use((req, res, next) => {
 
 let zalo = null;
 
-function initZaloBot() {
+// Hàm tự động quét và in danh sách nhóm ra Logs để lấy ID chuẩn
+async function fetchAndLogGroups() {
+  try {
+    if (!zalo) return;
+    console.log('🔄 Đang quét danh sách nhóm Zalo của tài khoản bot...');
+    const threadList = await zalo.getThreadList(0, 30); // Lấy 30 nhóm gần nhất
+    console.log('========================================');
+    console.log('📋 DANH SÁCH NHÓM ZALO ĐÃ TẢI THÀNH CÔNG:');
+    threadList.forEach(thread => {
+      // Lọc ra các nhóm chat (có threadId bắt đầu bằng chữ g)
+      if (thread.threadId && thread.threadId.startsWith('g')) {
+        console.log(`- Tên nhóm: ${thread.name} | Group ID: ${thread.threadId}`);
+      }
+    });
+    console.log('========================================');
+  } catch (err) {
+    console.error('⚠️ Không thể tự động lấy danh sách nhóm:', err.message);
+  }
+}
+
+async function initZaloBot() {
   const cookie = process.env.ZALO_COOKIE;
   const imei = process.env.ZALO_IMEI || "c37b42a3-89ef-4c12-8e10-9876543210ab";
   const userAgent = process.env.ZALO_USER_AGENT || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
@@ -26,6 +46,9 @@ function initZaloBot() {
     try {
       zalo = new Zalo({ cookie, imei, userAgent });
       console.log('✅ Khởi tạo Zalo Bot thành công!');
+      
+      // Chờ 2 giây sau khi khởi tạo rồi gọi hàm quét nhóm
+      setTimeout(fetchAndLogGroups, 2000);
     } catch (err) {
       console.error('❌ Lỗi khởi tạo Zalo Bot:', err.message);
     }
