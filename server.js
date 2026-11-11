@@ -9,10 +9,11 @@ let zalo = null;
 // Hàm khởi tạo Zalo bot an toàn
 function initZaloBot() {
   const cookie = process.env.ZALO_COOKIE;
-  const imei = process.env.ZALO_IMEI;
-  const userAgent = process.env.ZALO_USER_AGENT;
+  // Nếu không có IMEI trong biến môi trường, tự gán một IMEI mặc định cố định
+  const imei = process.env.ZALO_IMEI || "c37b42a3-89ef-4c12-8e10-9876543210ab"; 
+  const userAgent = process.env.ZALO_USER_AGENT || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-  if (cookie && imei && userAgent) {
+  if (cookie) {
     try {
       zalo = new Zalo({ cookie, imei, userAgent });
       console.log('✅ Khởi tạo Zalo Bot thành công!');
@@ -20,7 +21,7 @@ function initZaloBot() {
       console.error('❌ Lỗi khởi tạo Zalo Bot:', err.message);
     }
   } else {
-    console.log('⚠️ Chưa cấu hình ZALO_COOKIE, ZALO_IMEI hoặc ZALO_USER_AGENT trên Environment Variables.');
+    console.log('⚠️ Chưa cấu hình ZALO_COOKIE trên Environment Variables.');
   }
 }
 
