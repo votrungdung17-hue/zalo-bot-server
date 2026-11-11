@@ -1,17 +1,17 @@
 const express = require('express');
 const { Zalo } = require('zca-js');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors()); // Thêm dòng này để cho phép trang web gọi API thoải mái
 
 let zalo = null;
 
-// Hàm khởi tạo Zalo bot an toàn
 function initZaloBot() {
   const cookie = process.env.ZALO_COOKIE;
-  // Nếu không có IMEI trong biến môi trường, tự gán một IMEI mặc định cố định
-  const imei = process.env.ZALO_IMEI || "c37b42a3-89ef-4c12-8e10-9876543210ab"; 
-  const userAgent = process.env.ZALO_USER_AGENT || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+  const imei = process.env.ZALO_IMEI || "c37b42a3-89ef-4c12-8e10-9876543210ab";
+  const userAgent = process.env.ZALO_USER_AGENT || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36";
 
   if (cookie) {
     try {
@@ -25,11 +25,11 @@ function initZaloBot() {
   }
 }
 
-// Khởi chạy kiểm tra Zalo Bot
 initZaloBot();
 
+// Trang chủ không bị Not Found nữa
 app.get('/', (req, res) => {
-  res.send('Zalo Bot Server đang hoạt động!');
+  res.send('🚀 Zalo Bot Server cho Fast and Smile đang hoạt động!');
 });
 
 app.post('/send-mva', async (req, res) => {
@@ -37,7 +37,7 @@ app.post('/send-mva', async (req, res) => {
     if (!zalo) {
       return res.status(400).json({ 
         status: 'error', 
-        error: 'Chưa cấu hình tài khoản Zalo trên Server. Vui lòng thêm Environment Variables.' 
+        error: 'Chưa cấu hình ZALO_COOKIE trên Render. Vui lòng kiểm tra lại Environment Variables.' 
       });
     }
 
