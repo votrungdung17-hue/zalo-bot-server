@@ -4,7 +4,7 @@ const { Zalo } = require('zca-js');
 const app = express();
 app.use(express.json());
 
-// Bật CORS thủ công để trang web ở máy tính gọi sang không bị trình duyệt chặn
+// Bật CORS thủ công
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -17,23 +17,20 @@ app.use((req, res, next) => {
 
 let zalo = null;
 
-// Hàm tự động quét và in danh sách nhóm ra Logs để lấy ID chuẩn
+// Hàm quét nhóm với bắt lỗi chi tiết
 async function fetchAndLogGroups() {
   try {
     if (!zalo) return;
-    console.log('🔄 Đang quét danh sách nhóm Zalo của tài khoản bot...');
-    const threadList = await zalo.getThreadList(0, 30); // Lấy 30 nhóm gần nhất
+    console.log('🔄 Đang quét danh sách nhóm Zalo...');
+    
+    // Thử gọi danh sách nhóm
+    const threadList = await zalo.getThreadList(); 
     console.log('========================================');
-    console.log('📋 DANH SÁCH NHÓM ZALO ĐÃ TẢI THÀNH CÔNG:');
-    threadList.forEach(thread => {
-      // Lọc ra các nhóm chat (có threadId bắt đầu bằng chữ g)
-      if (thread.threadId && thread.threadId.startsWith('g')) {
-        console.log(`- Tên nhóm: ${thread.name} | Group ID: ${thread.threadId}`);
-      }
-    });
+    console.log('📋 KẾT QUẢ QUÉT NHÓM:', threadList);
     console.log('========================================');
   } catch (err) {
-    console.error('⚠️ Không thể tự động lấy danh sách nhóm:', err.message);
+    // In toàn bộ đối tượng lỗi thay vì chỉ mỗi message để soi cho chuẩn
+    console.error('❌ LỖI CHI TIẾT KHI LẤY DANH SÁCH NHÓM:', err);
   }
 }
 
@@ -47,10 +44,10 @@ async function initZaloBot() {
       zalo = new Zalo({ cookie, imei, userAgent });
       console.log('✅ Khởi tạo Zalo Bot thành công!');
       
-      // Chờ 2 giây sau khi khởi tạo rồi gọi hàm quét nhóm
-      setTimeout(fetchAndLogGroups, 2000);
+      // Chờ 3 giây rồi chạy hàm quét
+      setTimeout(fetchAndLogGroups, 3000);
     } catch (err) {
-      console.error('❌ Lỗi khởi tạo Zalo Bot:', err.message);
+      console.error('❌ Lỗi khởi tạo Zalo Bot:', err);
     }
   } else {
     console.log('⚠️ Chưa cấu hình ZALO_COOKIE trên Environment Variables.');
@@ -66,10 +63,7 @@ app.get('/', (req, res) => {
 app.post('/send-mva', async (req, res) => {
   try {
     if (!zalo) {
-      return res.status(400).json({ 
-        status: 'error', 
-        error: 'Chưa cấu hình ZALO_COOKIE trên Render. Vui lòng kiểm tra lại Environment Variables.' 
-      });
+      return res.status(400).json({ status: 'error', error: 'Chưa cấu hình ZALO_COOKIE' });
     }
 
     const { groupId, message } = req.body;
