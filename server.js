@@ -1,10 +1,19 @@
 const express = require('express');
 const { Zalo } = require('zca-js');
-const cors = require('cors');
 
 const app = express();
 app.use(express.json());
-app.use(cors()); // Thêm dòng này để cho phép trang web gọi API thoải mái
+
+// Bật CORS thủ công để trang web ở máy tính gọi sang không bị trình duyệt chặn
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 let zalo = null;
 
@@ -27,7 +36,6 @@ function initZaloBot() {
 
 initZaloBot();
 
-// Trang chủ không bị Not Found nữa
 app.get('/', (req, res) => {
   res.send('🚀 Zalo Bot Server cho Fast and Smile đang hoạt động!');
 });
