@@ -1,7 +1,6 @@
 {
   "name": "zalo-bot-server",
   "version": "1.0.0",
-  "description": "Zalo Bot Server for Fast and Smile",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
